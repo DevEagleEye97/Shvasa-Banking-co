@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shvasa Bank – Virtual ATM System</title>
+  <meta name="description" content="Educational Virtual Indian ATM Banking System demonstrating C programming logic." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="particles" id="particlesContainer" aria-hidden="true"></div>
+  <div class="ambient-leaves" aria-hidden="true">
+    <div class="leaf leaf-1"></div><div class="leaf leaf-2"></div>
+    <div class="leaf leaf-3"></div><div class="leaf leaf-4"></div><div class="leaf leaf-5"></div>
+  </div>
+  <header class="top-bar" role="banner">
+    <div class="top-bar-left">
+      <div class="bank-logo">
+        <span class="logo-icon">🌿</span>
+        <div class="logo-text">
+          <span class="logo-name">SHVASA BANK</span>
+          <span class="logo-sub">Virtual Banking System</span>
+        </div>
+      </div>
+    </div>
+    <div class="top-bar-right">
+      <div class="edu-badge"><span class="edu-dot"></span>EDUCATIONAL DEMO</div>
+      <button class="sound-btn" id="soundToggle" aria-label="Toggle Sound">🔊</button>
+      <button class="settings-btn" id="settingsBtn" aria-label="Settings">⚙️</button>
+    </div>
+  </header>
+  <div class="modal-overlay hidden" id="settingsModal" role="dialog" aria-modal="true">
+    <div class="modal-card settings-modal">
+      <button class="modal-close" id="closeSettings">✕</button>
+      <h2 class="modal-title">⚙️ Settings &amp; Help</h2>
+      <div class="settings-section">
+        <h3>Demo Credentials</h3>
+        <div class="cred-row"><span class="cred-label">PIN</span><span class="cred-val mono">1234</span></div>
+        <div class="cred-row"><span class="cred-label">Balance</span><span class="cred-val">₹10,000</span></div>
+      </div>
+      <div class="settings-section">
+        <h3>Reset Demo Account</h3>
+        <p>Resets balance to ₹10,000 and clears transaction history.</p>
+        <button class="btn-danger" id="resetDemoBtn">🔄 Reset Demo Account</button>
+      </div>
+      <div class="settings-section">
+        <h3>C Concepts Demonstrated</h3>
+        <ul class="concept-list">
+          <li>Variables &amp; Data Types (int, float)</li>
+          <li>printf() / scanf() I/O logic</li>
+          <li>if / else / else if decisions</li>
+          <li>switch / case menu selection</li>
+          <li>Arithmetic Operators (+, -, =)</li>
+          <li>Comparison Operators (==, &gt;, &lt;)</li>
+          <li>Logical Operators (&amp;&amp;, ||)</li>
+        </ul>
+      </div>
+      <div class="settings-section disclaimer">
+        <p>⚠️ This is a <strong>100% educational simulation</strong>. No real banking data is used or stored.</p>
+      </div>
+    </div>
+  </div>
+  <main class="main-container" role="main">
+    <div class="atm-wrapper" id="atmWrapper">
+      <div class="atm-machine" id="atmMachine">
+        <div class="atm-top-bezel">
+          <div class="atm-lights">
+            <span class="atm-light green" id="lightGreen"></span>
+            <span class="atm-light amber" id="lightAmber"></span>
+          </div>
+          <div class="atm-brand">
+            <span class="atm-brand-icon">🌿</span>
+            <div><div class="atm-brand-name">SHVASA</div><div class="atm-brand-sub">SECURE ATM</div></div>
+          </div>
+          <div class="contactless-symbol">
+            <div class="wave w1"></div><div class="wave w2"></div><div class="wave w3"></div>
+          </div>
+        </div>
+        <div class="atm-screen-frame">
+          <div class="atm-screen" id="atmScreen">
+            <div class="screen-panel" id="idleScreen">
+              <div class="idle-glow"></div>
+              <div class="idle-logo">
+                <div class="idle-logo-icon">🌿</div>
+                <h1 class="idle-bank-name">SHVASA BANK</h1>
+                <p class="idle-tagline">Your money. Your control.</p>
+              </div>
+              <div class="idle-info">
+                <p class="idle-sub">Virtual ATM Banking System</p>
+                <div class="idle-time" id="idleTime"></div>
+                <div class="security-indicator">
+                  <span class="lock-icon">🔐</span>
+                  <span class="security-text">SECURE CONNECTION ACTIVE</span>
+                  <span class="secure-dot"></span>
+                </div>
+              </div>
+              <div class="idle-instruction">Insert your card to begin</div>
+              <div class="idle-demo-note">EDUCATIONAL DEMO — NOT A REAL BANK</div>
+            </div>
+            <div class="screen-panel hidden" id="readingScreen">
+              <div class="reading-container">
+                <div class="reading-icon">💳</div>
+                <div class="reading-text" id="readingText">Reading Card...</div>
+                <div class="reading-bar"><div class="reading-progress" id="readingProgress"></div></div>
+                <div class="terminal-text mono" id="terminalText"></div>
+              </div>
+            </div>
+            <div class="screen-panel hidden" id="pinScreen">
+              <div class="pin-header">
+                <div class="pin-icon">🔐</div>
+                <h2 class="pin-title">ENTER YOUR PIN</h2>
+                <p class="pin-sub">4-digit security PIN &nbsp;|&nbsp; Demo: 1234</p>
+              </div>
+              <div class="pin-dots" id="pinDots">
+                <div class="pin-dot" id="d0"></div><div class="pin-dot" id="d1"></div>
+                <div class="pin-dot" id="d2"></div><div class="pin-dot" id="d3"></div>
+              </div>
+              <div class="pin-message" id="pinMessage"></div>
+              <div class="pin-keypad" id="pinKeypad">
+                <button class="pin-key" data-val="1">1</button>
+                <button class="pin-key" data-val="2">2</button>
+                <button class="pin-key" data-val="3">3</button>
+                <button class="pin-key" data-val="4">4</button>
+                <button class="pin-key" data-val="5">5</button>
+                <button class="pin-key" data-val="6">6</button>
+                <button class="pin-key" data-val="7">7</button>
+                <button class="pin-key" data-val="8">8</button>
+                <button class="pin-key" data-val="9">9</button>
+                <button class="pin-key pin-clear" data-val="clear">CLR</button>
+                <button class="pin-key" data-val="0">0</button>
+                <button class="pin-key pin-enter" data-val="enter">OK</button>
+              </div>
+              <div class="pin-attempts" id="pinAttempts"></div>
+            </div>
+            <div class="screen-panel hidden" id="lockedScreen">
+              <div class="locked-container">
+                <div class="locked-icon">🔒</div>
+                <h2 class="locked-title">DEMO LOCKED</h2>
+                <p class="locked-sub">Too many incorrect PIN attempts</p>
+                <div class="locked-countdown" id="lockedCountdown">30</div>
+                <p class="locked-note">Unlocks in <span id="countdownSec">30</span> seconds</p>
+                <button class="btn-secondary" id="unlockEarlyBtn">Reset &amp; Unlock Demo</button>
+              </div>
+            </div>
+            <div class="screen-panel hidden" id="dashboardScreen">
+              <div class="dashboard-header">
+                <div class="dash-welcome">
+                  <span class="dash-greet">Welcome back,</span>
+                  <span class="dash-name">Demo User</span>
+                </div>
+                <div class="dash-auth-badge">✅ Authenticated</div>
+              </div>
+              <div class="balance-card">
+                <div class="balance-label">AVAILABLE BALANCE</div>
+                <div class="balance-amount" id="balanceDisplay">₹10,000</div>
+                <div class="balance-meta">
+                  <span>A/C: XXXX XXXX 4521</span>
+                  <span class="balance-status">● ACTIVE</span>
+                </div>
+              </div>
+              <div class="menu-grid">
+                <button class="menu-card" id="withdrawBtn">
+                  <span class="menu-icon">💰</span>
+                  <span class="menu-title">WITHDRAW</span>
+                  <span class="menu-desc">Take cash from balance</span>
+                  <span class="menu-arrow">→</span>
+                </button>
+                <button class="menu-card" id="balanceBtn">
+                  <span class="menu-icon">💳</span>
+                  <span class="menu-title">CHECK BALANCE</span>
+                  <span class="menu-desc">View your balance</span>
+                  <span class="menu-arrow">→</span>
+                </button>
+                <button class="menu-card" id="netBankingBtn">
+                  <span class="menu-icon">🌐</span>
+                  <span class="menu-title">NET BANKING</span>
+                  <span class="menu-desc">Account &amp; history</span>
+                  <span class="menu-arrow">→</span>
+                </button>
+                <button class="menu-card eject-card-btn" id="ejectBtn">
+                  <span class="menu-icon">🚪</span>
+                  <span class="menu-title">EJECT CARD</span>
+                  <span class="menu-desc">Safely remove card</span>
+                  <span class="menu-arrow">→</span>
+                </button>
+              </div>
+            </div>
+            <div class="screen-panel hidden" id="withdrawScreen">
+              <div class="screen-top-bar">
+                <button class="back-btn" id="withdrawBackBtn">← Back</button>
+                <h2 class="screen-title">WITHDRAW CASH</h2>
+              </div>
+              <p class="screen-sub">How much would you like to withdraw?</p>
+              <div class="quick-amounts" id="quickAmounts">
+                <button class="amount-btn" data-amount="500">₹500</button>
+                <button class="amount-btn" data-amount="1000">₹1,000</button>
+                <button class="amount-btn" data-amount="2000">₹2,000</button>
+                <button class="amount-btn" data-amount="5000">₹5,000</button>
+                <button class="amount-btn" data-amount="10000">₹10,000</button>
+              </div>
+              <div class="custom-amount-row">
+                <label class="custom-label" for="customAmountInput">Custom Amount</label>
+                <div class="custom-input-wrap">
+                  <span class="rupee-prefix">₹</span>
+                  <input type="number" class="custom-input" id="customAmountInput" placeholder="Enter amount" min="1" step="100" />
+                </div>
+              </div>
+              <div class="withdraw-msg" id="withdrawMsg"></div>
+              <button class="btn-primary" id="proceedWithdrawBtn">PROCEED →</button>
+            </div>
+            <div class="screen-panel hidden" id="confirmWithdrawScreen">
+              <div class="screen-top-bar">
+                <button class="back-btn" id="confirmBackBtn">← Back</button>
+                <h2 class="screen-title">CONFIRM WITHDRAWAL</h2>
+              </div>
+              <div class="confirm-card">
+                <div class="confirm-row">
+                  <span class="confirm-label">Withdrawal Amount</span>
+                  <span class="confirm-value primary" id="confirmAmount">₹0</span>
+                </div>
+                <div class="confirm-row">
+                  <span class="confirm-label">Current Balance</span>
+                  <span class="confirm-value" id="confirmCurrent">₹0</span>
+                </div>
+                <div class="confirm-divider"></div>
+                <div class="confirm-row">
+                  <span class="confirm-label">Remaining Balance</span>
+                  <span class="confirm-value success" id="confirmRemaining">₹0</span>
+                </div>
+                <div class="confirm-row">
+                  <span class="confirm-label">Transaction Fee</span>
+                  <span class="confirm-value">₹0 (Demo)</span>
+                </div>
+              </div>
+              <div class="confirm-actions">
+                <button class="btn-success" id="confirmWithdrawBtn">✓ CONFIRM</button>
+                <button class="btn-danger" id="cancelWithdrawBtn">✕ CANCEL</button>
+              </div>
+            </div>
+            <div class="screen-panel hidden" id="processingScreen">
+              <div class="processing-container">
+                <div class="processing-ring"><div class="ring-inner"></div></div>
+                <div class="processing-text" id="processingText">PROCESSING...</div>
+                <div class="processing-steps" id="processingSteps"></div>
+                <div class="terminal-text mono" id="processingTerminal"></div>
+              </div>
+            </div>
+            <div class="screen-panel hidden" id="cashScreen">
+              <div class="cash-container">
+                <div class="cash-title">PLEASE COLLECT YOUR CASH</div>
+                <div class="cash-amount-display" id="cashAmountDisplay">₹0</div>
+                <div class="cash-notes" id="cashNotes"></div>
+                <div class="cash-status" id="cashStatus">✅ TRANSACTION SUCCESSFUL</div>
+                <div class="cash-buttons">
+                  <button class="btn-secondary" id="printReceiptBtn">🖨️ Print Receipt</button>
+                  <button class="btn-primary" id="backToDashBtn">Back to Menu</button>
+                </div>
+              </div>
+            </div>
+            <div class="screen-panel hidden" id="balanceScreen">
+              <div class="screen-top-bar">
+                <button class="back-btn" id="balanceBackBtn">← Back</button>
+                <h2 class="screen-title">ACCOUNT BALANCE</h2>
+              </div>
+              <div class="balance-check-card">
+                <div class="bal-check-icon">💳</div>
+                <div class="bal-check-label">Available Balance</div>
+                <div class="bal-check-amount" id="balanceCheckAmount">₹10,000</div>
+                <div class="bal-check-meta">
+                  <span>Account: XXXX XXXX 4521</span>
+                  <span>Status: <span class="status-active">ACTIVE</span></span>
+                </div>
+                <div class="bal-date" id="balanceDate"></div>
+              </div>
+              <div class="balance-note">Balance as of today (Demo)</div>
+            </div>
+            <div class="screen-panel hidden" id="netBankingScreen">
+              <div class="screen-top-bar">
+                <button class="back-btn" id="netBankingBackBtn">← Back</button>
+                <h2 class="screen-title">INTERNET BANKING</h2>
+              </div>
+              <div class="net-banking-tabs">
+                <button class="nb-tab active" data-tab="summary">Summary</button>
+                <button class="nb-tab" data-tab="history">History</button>
+                <button class="nb-tab" data-tab="details">Details</button>
+                <button class="nb-tab" data-tab="security">Security</button>
+              </div>
+              <div class="nb-content" id="nbContent"></div>
+            </div>
+            <div class="screen-panel hidden" id="ejectScreen">
+              <div class="eject-container">
+                <div class="eject-icon">💳</div>
+                <h2 class="eject-title">PLEASE COLLECT YOUR CARD</h2>
+                <p class="eject-sub">Remove card from slot</p>
+                <div class="eject-progress"><div class="eject-bar" id="ejectBar"></div></div>
+              </div>
+            </div>
+            <div class="screen-panel hidden" id="thankYouScreen">
+              <div class="thankyou-container">
+                <div class="thankyou-icon">🙏</div>
+                <h2 class="thankyou-title">THANK YOU</h2>
+                <p class="thankyou-sub">for banking with Shvasa</p>
+                <div class="thankyou-divider"></div>
+                <p class="thankyou-msg">Have a great day!</p>
+                <button class="btn-primary" id="startOverBtn">Start New Session</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="atm-controls">
+          <div class="atm-card-slot-area">
+            <div class="slot-label">CARD</div>
+            <div class="atm-card-slot" id="cardSlot">
+              <div class="slot-indicator" id="slotIndicator"></div>
+            </div>
+          </div>
+          <div class="atm-cash-area">
+            <div class="slot-label">CASH</div>
+            <div class="atm-cash-outlet" id="cashOutlet">
+              <div class="cash-shutter" id="cashShutter"></div>
+            </div>
+          </div>
+          <div class="atm-receipt-area">
+            <div class="slot-label">RECEIPT</div>
+            <div class="atm-receipt-outlet" id="receiptOutlet"></div>
+          </div>
+        </div>
+        <div class="atm-keypad-decor" aria-hidden="true">
+          <div class="decor-key-row">
+            <span class="decor-key"></span><span class="decor-key"></span><span class="decor-key"></span>
+          </div>
+          <div class="decor-key-row">
+            <span class="decor-key"></span><span class="decor-key"></span><span class="decor-key"></span>
+          </div>
+          <div class="decor-key-row">
+            <span class="decor-key"></span><span class="decor-key"></span><span class="decor-key"></span>
+          </div>
+        </div>
+        <div class="atm-speaker" aria-hidden="true"><div class="speaker-grille"></div></div>
+        <div class="atm-footer-text" aria-hidden="true">
+          <span class="mono">SEC-256 · ENC-AES · VER-2.4.1 · EDU-DEMO-ONLY</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-stage" id="cardStage">
+      <div class="debit-card" id="debitCard" tabindex="0" role="button" aria-label="Click to insert card into ATM">
+        <div class="card-inner">
+          <div class="card-front">
+            <div class="card-bg-pattern" aria-hidden="true"></div>
+            <div class="card-bg-leaves" aria-hidden="true">
+              <div class="cl cl-1"></div><div class="cl cl-2"></div><div class="cl cl-3"></div>
+            </div>
+            <div class="card-top-row">
+              <div class="card-bank-logo">🌿 SHVASA</div>
+              <div class="card-type-icon">
+                <div class="cw cw1"></div><div class="cw cw2"></div><div class="cw cw3"></div>
+              </div>
+            </div>
+            <div class="card-chip-row">
+              <div class="chip">
+                <div class="chip-lines">
+                  <div class="chip-h"></div><div class="chip-h"></div><div class="chip-h"></div>
+                  <div class="chip-v"></div><div class="chip-sq"></div>
+                </div>
+              </div>
+              <div class="card-type-badge">VIRTUAL DEBIT</div>
+            </div>
+            <div class="card-number">4521 •••• •••• 8765</div>
+            <div class="card-bottom-row">
+              <div class="card-holder">
+                <div class="card-label">CARD HOLDER</div>
+                <div class="card-value">DEMO USER</div>
+              </div>
+              <div class="card-expiry">
+                <div class="card-label">EXPIRES</div>
+                <div class="card-value">12/30</div>
+              </div>
+            </div>
+            <div class="card-network">
+              <div class="net-circle nc1"></div><div class="net-circle nc2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-glow-label" id="cardGlowLabel">
+        <span class="pulse-dot"></span>CLICK THE CARD TO INSERT
+      </div>
+    </div>
+  </main>
+  <div class="modal-overlay hidden" id="receiptModal" role="dialog" aria-modal="true">
+    <div class="receipt-paper" id="receiptPaper">
+      <div class="receipt-header">
+        <div class="receipt-logo">🌿 SHVASA BANK</div>
+        <div class="receipt-sub">VIRTUAL ATM RECEIPT</div>
+        <div class="receipt-line"></div>
+      </div>
+      <div class="receipt-body" id="receiptBody"></div>
+      <div class="receipt-footer">
+        <div class="receipt-line"></div>
+        <div class="receipt-edu">⚠️ EDUCATIONAL DEMO</div>
+        <div class="receipt-edu-sub">Not a real transaction receipt</div>
+        <div class="receipt-line"></div>
+        <div class="receipt-thank">Thank you for using Shvasa Bank</div>
+      </div>
+      <button class="btn-secondary receipt-close-btn" id="closeReceiptBtn">Close Receipt</button>
+    </div>
+  </div>
+  <section class="c-logic-panel" id="cLogicPanel">
+    <div class="c-panel-header" id="cPanelToggle" tabindex="0" role="button" aria-expanded="false">
+      <span class="c-panel-icon">💻</span>
+      <span class="c-panel-title">C PROGRAMMING LOGIC — View the code behind this ATM</span>
+      <span class="c-panel-arrow" id="cPanelArrow">▼</span>
+    </div>
+    <div class="c-panel-body hidden" id="cPanelBody">
+      <div class="c-info">
+        <p>The JavaScript logic mirrors the C code below, showing how core programming concepts power a real banking system.</p>
+      </div>
+      <div class="c-code-tabs">
+        <button class="c-tab active" data-ctab="pin">PIN Verify</button>
+        <button class="c-tab" data-ctab="menu">Menu</button>
+        <button class="c-tab" data-ctab="withdraw">Withdraw</button>
+        <button class="c-tab" data-ctab="balance">Balance</button>
+      </div>
+      <div class="c-code-display" id="cCodeDisplay"></div>
+    </div>
+  </section>
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-content">
+      <div class="footer-brand">🌿 SHVASA BANK — Virtual Banking System</div>
+      <div class="footer-edu">⚠️ 100% educational simulation. No real banking data used or stored.</div>
+      <div class="footer-tech">Built with HTML5 · CSS3 · Vanilla JavaScript · C Programming Logic</div>
+    </div>
+  </footer>
+  <script src="script.js"></script>
+</body>
+</html>
