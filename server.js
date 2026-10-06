@@ -97,7 +97,7 @@ app.use(requestLogger(logger));
 app.use(sanitizeInput);
 
 // Performance monitoring
-app.use(performanceLogger);
+app.use(performanceLogger());
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -110,8 +110,11 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Serve static frontend files
+app.use(express.static(__dirname));
+
 // API info endpoint
-app.get('/', (req, res) => {
+const apiInfoHandler = (req, res) => {
   res.json({
     service: 'Shvasa ATM Backend',
     version: '1.0.0',
@@ -143,6 +146,15 @@ app.get('/', (req, res) => {
     },
     documentation: 'See README.md for full API documentation'
   });
+};
+
+app.get('/api', apiInfoHandler);
+
+app.get('/', (req, res, next) => {
+  if (req.accepts('html')) {
+    return res.sendFile(join(__dirname, 'index.html'));
+  }
+  return apiInfoHandler(req, res);
 });
 
 // Mount API routes
@@ -152,49 +164,48 @@ app.use('/api/transactions', atmRoutes.transactions);
 app.use('/api/session', atmRoutes.session);
 app.use('/api/system', atmRoutes.system);
 
-// Serve static frontend files
-app.use(express.static(join(__dirname, '..')));
-
 // 404 handler
 app.use(notFoundHandler);
 
 // Global error handler (must be last)
 app.use(globalErrorHandler);
 
-// Start server
-const server = app.listen(PORT, HOST, () => {
-  logger.info(`🚀 Shvasa ATM Backend running on http://${HOST}:${PORT}`);
-  logger.info(`Environment: ${process.env.NODE_ENV}`);
-  logger.info(`API documentation available at http://${HOST}:${PORT}/`);
-});
-
-// Graceful shutdown handling
-const shutdown = (signal) => {
-  logger.info(`${signal} received, shutting down gracefully...`);
-  server.close(() => {
-    logger.info('Process terminated');
-    process.exit(0);
+// Start server (only in standalone mode, not in Vercel serverless)
+if (!process.env.VERCEL) {
+  const server = app.listen(PORT, HOST, () => {
+    logger.info(`🚀 Shvasa ATM Backend running on http://${HOST}:${PORT}`);
+    logger.info(`Environment: ${process.env.NODE_ENV}`);
+    logger.info(`API documentation available at http://${HOST}:${PORT}/`);
   });
-  
-  // Force shutdown after 10s
-  setTimeout(() => {
-    logger.error('Forced shutdown after timeout');
+
+  // Graceful shutdown handling
+  const shutdown = (signal) => {
+    logger.info(`${signal} received, shutting down gracefully...`);
+    server.close(() => {
+      logger.info('Process terminated');
+      process.exit(0);
+    });
+    
+    // Force shutdown after 10s
+    setTimeout(() => {
+      logger.error('Forced shutdown after timeout');
+      process.exit(1);
+    }, 10000);
+  };
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+
+  // Handle uncaught exceptions in standalone mode
+  process.on('uncaughtException', (error) => {
+    logger.error('Uncaught Exception:', error);
     process.exit(1);
-  }, 10000);
-};
+  });
 
-process.on('SIGTERM', () => shutdown('SIGTERM'));
-process.on('SIGINT', () => shutdown('SIGINT'));
-
-// Handle uncaught exceptions
-process.on('uncaughtException', (error) => {
-  logger.error('Uncaught Exception:', error);
-  process.exit(1);
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  process.exit(1);
-});
+  process.on('unhandledRejection', (reason, promise) => {
+    logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    process.exit(1);
+  });
+}
 
 export default app;

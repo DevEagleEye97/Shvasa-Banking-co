@@ -42,14 +42,28 @@ export const requestLogger = (logger) => {
  * Performance monitoring middleware
  * Adds response time header and logs slow requests
  */
-export const performanceLogger = (threshold = 500) => {
+export const performanceLogger = (thresholdOrReq = 500, res = null, next = null) => {
+  // Direct middleware usage: app.use(performanceLogger)
+  if (typeof next === 'function') {
+    const start = process.hrtime.bigint();
+    res.on('finish', () => {
+      const end = process.hrtime.bigint();
+      const duration = Number(end - start) / 1e6;
+      if (duration > 500) {
+        console.warn(`⚠️  Slow request: ${thresholdOrReq.method} ${thresholdOrReq.originalUrl} - ${duration.toFixed(2)}ms`);
+      }
+    });
+    return next();
+  }
+
+  // Factory usage: app.use(performanceLogger(500))
+  const threshold = typeof thresholdOrReq === 'number' ? thresholdOrReq : 500;
   return (req, res, next) => {
     const start = process.hrtime.bigint();
 
     res.on('finish', () => {
       const end = process.hrtime.bigint();
       const duration = Number(end - start) / 1e6; // Convert to milliseconds
-      res.set('X-Response-Time', `${duration.toFixed(2)}ms`);
 
       if (duration > threshold) {
         console.warn(`⚠️  Slow request: ${req.method} ${req.originalUrl} - ${duration.toFixed(2)}ms`);
