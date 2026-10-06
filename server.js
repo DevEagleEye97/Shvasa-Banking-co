@@ -110,7 +110,8 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Serve static frontend files
+// Serve static frontend files (check public folder, then root)
+app.use(express.static(join(__dirname, 'public')));
 app.use(express.static(__dirname));
 
 // API info endpoint

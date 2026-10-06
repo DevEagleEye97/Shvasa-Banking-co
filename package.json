@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "build": "echo 'Build complete'",
+    "build": "node -e \"const fs = require('fs'); if (!fs.existsSync('public')) fs.mkdirSync('public'); ['index.html', 'style.css', 'script.js'].forEach(f => fs.copyFileSync(f, 'public/' + f));\"",
     "dev": "nodemon server.js",
     "test": "echo \"No tests yet\" && exit 0"
   },
